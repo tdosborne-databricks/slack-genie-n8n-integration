@@ -10,27 +10,27 @@ resources:
       resources:
         - name: 'ngrok-token'
           secret:
-            scope: trevorosborne
+            scope: <your-scope-name>
             key: ngrok-token
             permission: READ
         - name: 'ngrok-url'
           secret:
-            scope: trevorosborne
+            scope: <your-scope-name>
             key: ngrok-url
             permission: READ
         - name: 'postgres-password'
           secret:
-            scope: trevorosborne
+            scope: <your-scope-name>
             key: postgres-password
             permission: READ
         - name: 'postgres-user'
           secret:
-            scope: trevorosborne
+            scope: <your-scope-name>
             key: postgres-user
             permission: READ
         - name: 'postgres-host'
           secret:
-            scope: trevorosborne
+            scope: <your-scope-name>
             key: postgres-host
             permission: READ
 
@@ -39,4 +39,4 @@ targets:
     mode: development
     default: true
     workspace:
-      host: https://e2-dogfood.staging.cloud.databricks.com/
+      host: <your-databricks-workspace-host>
