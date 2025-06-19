@@ -159,7 +159,8 @@ For more details, see the [Databricks documentation on secret management](https:
 
 #### **B. Deploy Databricks App via Asset Bundle**
 
-- Clone this repository and update the `host` key in the `workspace` mapping under your target (e.g., dev) to your Databricks workspace host.
+- Clone this repository and edit the `databricks.yml` file by replacing <your-databricks-workspace-host> with your Databricks workspace host and <your-scope-name> with the scope that was created to store the Databricks secrets.
+
 - Deploy the bundle:
 ```bash
 databricks bundle validate
