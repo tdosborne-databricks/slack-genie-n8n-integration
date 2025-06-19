@@ -1,0 +1,30 @@
+env:
+# N8N configuration
+- name: N8N_PORT
+  value: '8000'
+- name: N8N_HOST
+  value: '0.0.0.0'
+- name: N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE
+  value: 'true'
+- name: DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED
+  value: 'false'
+- name: WEBHOOK_URL
+  valueFrom: ngrok-url
+- name: NGROK_TOKEN
+  valueFrom: ngrok-token
+
+# Database configuration
+- name: DB_TYPE
+  value: postgresdb
+- name: DB_POSTGRESDB_DATABASE
+  value: databricks_postgres
+- name: DB_POSTGRESDB_SCHEMA
+  value: n8n
+- name: DB_POSTGRESDB_HOST
+  valueFrom: postgres-host
+- name: DB_POSTGRESDB_PORT
+  value: 5432
+- name: DB_POSTGRESDB_USER
+  valueFrom: postgres-user
+- name: DB_POSTGRESDB_PASSWORD
+  valueFrom: postgres-password
