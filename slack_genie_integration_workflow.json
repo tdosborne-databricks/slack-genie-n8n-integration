@@ -1,0 +1,928 @@
+{
+  "name": "Slack Genie Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "operation": "notEqual",
+              "value2": "timeout"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        60,
+        780
+      ],
+      "id": "b4013579-69df-45aa-970a-bd4f326b2aa4",
+      "name": "Check Timeout"
+    },
+    {
+      "parameters": {
+        "amount": "={{ $json.waitTimeInSeconds }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        280,
+        920
+      ],
+      "id": "b7545c16-9073-4f24-b081-6cfb9a2e1153",
+      "name": "Wait Backoff",
+      "webhookId": "32902320-46ac-4317-9932-5372f94f23f2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "retryCount",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "name": "initialDelay",
+              "value": 5,
+              "type": "number"
+            },
+            {
+              "name": "maxDelay",
+              "value": 60,
+              "type": "number"
+            },
+            {
+              "name": "totalElapsed",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "name": "maxTotal",
+              "value": 600,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1940,
+        660
+      ],
+      "id": "58cae5a8-6375-46a0-a39b-c7da63aa329a",
+      "name": "Set Backoff Params"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const retryCount = $(\"Set Backoff Params\").item.json.retryCount || 0;\nconst initialDelay = $(\"Set Backoff Params\").item.json.initialDelay || 5;\nconst maxDelay = $(\"Set Backoff Params\").item.json.maxDelay || 60;\nconst totalElapsed = $(\"Set Backoff Params\").item.json.totalElapsed || 0;\nconst maxTotal = $(\"Set Backoff Params\").item.json.maxTotal || 600;\n\nlet delay = retryCount < 24 ? initialDelay : Math.min(initialDelay * Math.pow(2, retryCount - 24), maxDelay);\nlet newTotal = totalElapsed + delay;\n\nif (newTotal > maxTotal) {\n  $json.status = \"timeout\";\n  $json.error = \"Polling exceeded 10 minutes\";\n}\n\n$(\"Set Backoff Params\").item.json.retryCount = retryCount + 1;\n$(\"Set Backoff Params\").item.json.totalElapsed = newTotal;\nreturn {\n        json: {\n            message_id: $json.message_id,\n            conversation_id: $json.conversation_id,\n            waitTimeInSeconds: delay, // Pass the delay time in seconds\n            status: $json.status,\n        }\n    }"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        780
+      ],
+      "id": "9f41dbba-6df0-4b7d-929c-c13ea7f0bf4d",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "content": "# Send message to Genie and wait for response",
+        "height": 640,
+        "width": 2140
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1860,
+        300
+      ],
+      "id": "04d6fcfd-779b-4dd6-af42-f67a31b947f7",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "93122887-fc3f-49b9-81ca-48217e4ba37a",
+              "leftValue": "={{ $json.attachments[0].query }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        60,
+        480
+      ],
+      "id": "a9da2205-8604-4da1-9c6c-79dcdf8adb6e",
+      "name": "Check response content",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "893e001f-7977-4631-9c86-f994677bd941",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        580
+      ],
+      "id": "2a72047d-f822-4257-bfb9-5c28c85e0bf2",
+      "name": "Check response status",
+      "notesInFlow": true,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "content": "# Get result table and generate natural language response",
+        "height": 640,
+        "width": 780
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4660350c-3231-4a61-a6e7-8319462c0b3e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "trigger": [
+          "app_mention"
+        ],
+        "channelId": {
+          "__rl": true,
+          "value": "C0923GP1C7J",
+          "mode": "list",
+          "cachedResultName": "dbdemos-ai-bi-marketing-campaign-genie-space"
+        },
+        "options": {
+          "resolveIds": true
+        }
+      },
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2380,
+        660
+      ],
+      "id": "bfffd8bc-facb-466a-b590-671af98758a5",
+      "name": "Receive Slack message",
+      "webhookId": "5686c6f0-f248-4929-9e5a-d155c78eb667",
+      "credentials": {
+        "slackApi": {
+          "id": "bjDWNlbd1Vx2oKq4",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3ecba06-07a8-4e44-9496-8.852456e+11",
+              "name": "space_id",
+              "value": "01f0488564b11b5faa935a71e74cf52f",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2160,
+        660
+      ],
+      "id": "e7d4f7eb-b4d1-48b7-904d-2f1ea12b03d0",
+      "name": "Set Genie Space"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "genie_conversations",
+          "mode": "list",
+          "cachedResultName": "genie_conversations"
+        },
+        "table": {
+          "__rl": true,
+          "value": "slack_genie_conversations",
+          "mode": "list",
+          "cachedResultName": "slack_genie_conversations"
+        },
+        "where": {
+          "values": [
+            {
+              "column": "thread_ts",
+              "value": "={{ $('Receive Slack message').item.json.thread_ts }}"
+            },
+            {
+              "column": "slack_channel",
+              "value": "={{ $('Receive Slack message').item.json.channel }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1720,
+        660
+      ],
+      "id": "ff18c9e4-d8a4-4120-b818-6fdf1dee6199",
+      "name": "Select Existing Conversations",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "6nRi6Dp3kAhdYz6N",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.isNotEmpty() }}",
+              "value2": "={{ true }}"
+            }
+          ]
+        }
+      },
+      "name": "User Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1500,
+        660
+      ],
+      "id": "51e243ef-2ce9-454e-82fa-cb64f931177a"
+    },
+    {
+      "parameters": {
+        "resource": "genie",
+        "spaceId": "={{  $('Set Genie Space').item.json.space_id }}",
+        "initialMessage": "={{ $('Receive Slack message').item.json.blocks[0].elements[0].elements[1].text }}"
+      },
+      "type": "n8n-nodes-databricks.databricks",
+      "typeVersion": 1,
+      "position": [
+        -1280,
+        760
+      ],
+      "id": "bf5be9a6-c564-4906-b7ce-dd09e9893998",
+      "name": "Start Conversation",
+      "credentials": {
+        "databricks": {
+          "id": "AzGoDFWGKeitm7Yg",
+          "name": "Databricks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "genie",
+        "operation": "createMessage",
+        "spaceId": "={{  $('Set Genie Space').item.json.space_id }}",
+        "conversationId": "={{ $json.genie_conversation_id }}",
+        "message": "={{ $('Receive Slack message').item.json.blocks[0].elements[0].elements[1].text }}"
+      },
+      "type": "n8n-nodes-databricks.databricks",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        560
+      ],
+      "id": "f4a994e7-f683-4440-a6df-6e15644e9e17",
+      "name": "Create Message",
+      "credentials": {
+        "databricks": {
+          "id": "AzGoDFWGKeitm7Yg",
+          "name": "Databricks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "-- Insert a new row for the specific slack_user_id with is_active set to true\nINSERT INTO databricks_postgres.genie_conversations.slack_genie_conversations (genie_conversation_id, slack_channel, slack_channel_resolved, thread_ts)\nVALUES ($1, $2, $3, $4);",
+        "options": {
+          "queryReplacement": "={{ $('Start Conversation').item.json.conversation_id }}, {{ $('Receive Slack message').item.json.channel }}, {{ $('Receive Slack message').item.json.channel_resolved }},{{ $('Receive Slack message').item.json.event_ts }} "
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1060,
+        760
+      ],
+      "id": "0071ec3e-f8d7-421a-8cc7-2c0c377b7180",
+      "name": "Insert Conversation ID for thread_ts",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "6nRi6Dp3kAhdYz6N",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "genie",
+        "operation": "getMessage",
+        "spaceId": "={{  $('Set Genie Space').item.json.space_id }}",
+        "conversationId": "={{ $json.conversation_id }}\n",
+        "messageId": "={{ $json.message_id }}"
+      },
+      "type": "n8n-nodes-databricks.databricks",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        660
+      ],
+      "id": "1bcae92a-cb39-4fe8-80a2-f24a0c6ac27d",
+      "name": "Get Message",
+      "credentials": {
+        "databricks": {
+          "id": "AzGoDFWGKeitm7Yg",
+          "name": "Databricks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ab03d536-9d58-4afa-bdbe-0f103838d8bf",
+              "name": "text",
+              "value": "={{ $('Get Message').item.json.attachments[0].text.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        640
+      ],
+      "id": "9f9aee49-41f8-415f-8ec1-194a42041755",
+      "name": "Format text output",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "resource": "genie",
+        "operation": "getQueryResults",
+        "spaceId": "={{ $('Get Message').item.json.space_id }}",
+        "conversationId": "={{ $('Get Message').item.json.conversation_id }}",
+        "messageId": "={{ $('Get Message').item.json.message_id }}",
+        "attachmentId": "={{ $('Get Message').item.json.attachments[0].attachment_id }}"
+      },
+      "type": "n8n-nodes-databricks.databricks",
+      "typeVersion": 1,
+      "position": [
+        280,
+        340
+      ],
+      "id": "c3fee91b-8f40-42a4-a8de-9545f46cb80f",
+      "name": "Get Query Results",
+      "credentials": {
+        "databricks": {
+          "id": "AzGoDFWGKeitm7Yg",
+          "name": "Databricks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "databricks-llama-4-maverick",
+        "options": {}
+      },
+      "type": "n8n-nodes-databricks.lmChatDatabricks",
+      "typeVersion": 1,
+      "position": [
+        580,
+        460
+      ],
+      "id": "d031918e-2e94-460a-964b-2df2c3d6e8b8",
+      "name": "Databricks Chat Model",
+      "credentials": {
+        "databricks": {
+          "id": "AzGoDFWGKeitm7Yg",
+          "name": "Databricks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Answer this question based on the SQL query results (in JSON): \n- question: {{ $('Get Message').item.json.content }}\n- result description: {{ $('Get Message').item.json.attachments[0].query.description }}\n- result manifest: {{ $json.statement_response.manifest.toJsonString() }}\n- query result: {{ $json.statement_response.result.toJsonString() }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are given a user question with supporting data and its description and data schema. Answer the user question using provided data and metadata in an easy to digest style. Don't respond with table, rather just summarize the insights that can be obtained in the table.\n\nIf result returned empty, reply that you didn't get a query result and therefore couldn't answer the question."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        500,
+        240
+      ],
+      "id": "fc992e57-619c-4839-b7e6-506fb9146d00",
+      "name": "Summarize query attachment",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc83fad5-d1c3-4781-bc6a-68d0400b1b8a",
+              "name": "text",
+              "value": "={{ $json.text.replace(/^- /gm, \"* \").replaceAll(\"**\", \"*\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        860,
+        580
+      ],
+      "id": "2041b22e-bba8-458c-ad58-103387143b56",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0923GP1C7J",
+          "mode": "list",
+          "cachedResultName": "dbdemos-ai-bi-marketing-campaign-genie-space"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "thread_ts": {
+            "replyValues": {
+              "thread_ts": "={{ $('Receive Slack message').first().json.ts }}"
+            }
+          },
+          "mrkdwn": true
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1080,
+        480
+      ],
+      "id": "1bf8a912-a136-4dd1-b56b-37b0bd1d0fee",
+      "name": "Send Genie response",
+      "webhookId": "9b164ec1-f2d6-4ac0-a3da-fb6fb4130cad",
+      "credentials": {
+        "slackApi": {
+          "id": "bjDWNlbd1Vx2oKq4",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "085142d9-6133-4792-8577-78277792bb08",
+              "name": "message_id",
+              "value": "={{ $('Start Conversation').item.json.message_id }}",
+              "type": "string"
+            },
+            {
+              "id": "c7d96883-8b10-4701-b1f7-f4088cb4597a",
+              "name": "conversation_id",
+              "value": "={{ $('Start Conversation').item.json.conversation_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -840,
+        760
+      ],
+      "id": "fca24f4c-dfc9-4c16-b9c5-29b87cf7c5b9",
+      "name": "Set Fields for New Conversation"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0b92233c-68cf-4a04-8dfe-0656b4e3c719",
+              "name": "message_id",
+              "value": "={{ $('Create Message').item.json.message_id }}",
+              "type": "string"
+            },
+            {
+              "id": "c28b52aa-bd71-4db1-8497-d0f67ed3060a",
+              "name": "conversation_id",
+              "value": "={{ $('Create Message').item.json.conversation_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -840,
+        560
+      ],
+      "id": "c0808e7c-591c-4959-841e-ac09d15de64f",
+      "name": "Set Fields for Existing Conversation"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc83fad5-d1c3-4781-bc6a-68d0400b1b8a",
+              "name": "text",
+              "value": "={{ $json.error.replace(/^- /gm, \"* \").replaceAll(\"**\", \"*\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        860,
+        280
+      ],
+      "id": "d28d05cf-a353-4f47-ba30-00269b9b24fc",
+      "name": "Format Error Message"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Check Timeout": {
+      "main": [
+        [
+          {
+            "node": "Wait Backoff",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Query Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Backoff": {
+      "main": [
+        [
+          {
+            "node": "Get Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Backoff Params": {
+      "main": [
+        [
+          {
+            "node": "Select Existing Conversations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Check Timeout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check response content": {
+      "main": [
+        [
+          {
+            "node": "Get Query Results",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format text output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check response status": {
+      "main": [
+        [
+          {
+            "node": "Check response content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive Slack message": {
+      "main": [
+        [
+          {
+            "node": "Set Genie Space",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Genie Space": {
+      "main": [
+        [
+          {
+            "node": "Set Backoff Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Existing Conversations": {
+      "main": [
+        [
+          {
+            "node": "User Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User Exists?": {
+      "main": [
+        [
+          {
+            "node": "Create Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Start Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Conversation": {
+      "main": [
+        [
+          {
+            "node": "Insert Conversation ID for thread_ts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Message": {
+      "main": [
+        [
+          {
+            "node": "Set Fields for Existing Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Conversation ID for thread_ts": {
+      "main": [
+        [
+          {
+            "node": "Set Fields for New Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Message": {
+      "main": [
+        [
+          {
+            "node": "Check response status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format text output": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Query Results": {
+      "main": [
+        [
+          {
+            "node": "Summarize query attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Databricks Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize query attachment",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize query attachment": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send Genie response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Fields for New Conversation": {
+      "main": [
+        [
+          {
+            "node": "Get Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Fields for Existing Conversation": {
+      "main": [
+        [
+          {
+            "node": "Get Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Error Message": {
+      "main": [
+        [
+          {
+            "node": "Send Genie response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7d46ce94-1ef3-43a8-af95-48488d678ddf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "66dfec447a4ca2b712d39e7bfecf838f23b3eecc4d0e6d3ce3ac05d3f711cae0"
+  },
+  "id": "EFsH7GkIpAesAeVz",
+  "tags": []
+}
