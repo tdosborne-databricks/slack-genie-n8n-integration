@@ -25,7 +25,9 @@ This accelerator enables your business to interact with Databricks datasets conv
 
 ## Dependencies
 
-- **Postgres (Lakebase):** Stores mapping between Slack threads and Genie conversation IDs.
+- **Postgres (Lakebase):** 
+    - Stores mapping between Slack threads and Genie conversation IDs 
+    - Database used by n8n instance for persisting user data.
 - **dbdemos:** Required for installing the `aibi-marketing-campaign` demo asset.
 - **ngrok:** Exposes n8n webhook endpoints to Slack for event delivery.
 - **Slack App:** Custom bot for receiving and responding to user queries in Slack.
