@@ -229,6 +229,12 @@ Go to Settings → Community Nodes → Enter `n8n-nodes-databricks`.
 
 ---
 
+## Disclaimer
+
+This solution accelerator is provided for use in development environments only. It is intended as a reference implementation and should be thoroughly tested and validated by your team before being used in any production setting. Databricks makes no warranties, express or implied, regarding the suitability, reliability, or accuracy of this accelerator for production use. Implementation and deployment into a production environment are the sole responsibility of the customer.
+
+---
+
 ## Credits
 
 - Mike Lo (Solutions Architect @ Databricks): Created the original template for the n8n Databricks app and maintains the n8n-nodes-databricks npm package.
