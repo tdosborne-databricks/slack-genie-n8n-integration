@@ -152,7 +152,7 @@ databricks secrets put --scope <name-of-scope> --key postgres-host --string-valu
 **Step 3: Set permissions (optional, if you need to specify READ access for a group or user):**
 
 ```bash
-databricks secrets put-acl --scope trevorosborne --principal users --permission READ
+databricks secrets put-acl --scope <name-of-scope> --principal users --permission READ
 ```
 
 For more details, see the [Databricks documentation on secret management](https://docs.databricks.com/aws/en/security/secrets/).
