@@ -56,7 +56,9 @@ This accelerator enables your business to interact with Databricks datasets conv
 - Create a table to map Slack thread IDs to Genie conversation IDs:
 
 ```sql
-CREATE TABLE slack_genie_conversations (
+CREATE SCHEMA genie_conversations;
+
+CREATE TABLE genie_conversations.slack_genie_conversations (
 thread_ts VARCHAR,
 genie_conversation_id VARCHAR,
 slack_channel VARCHAR
