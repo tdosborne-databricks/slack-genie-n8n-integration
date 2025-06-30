@@ -56,7 +56,9 @@ This accelerator enables your business to interact with Databricks datasets conv
 - Create a table to map Slack thread IDs to Genie conversation IDs:
 
 ```sql
-CREATE TABLE slack_thread_conversations (
+CREATE SCHEMA genie_conversations;
+
+CREATE TABLE genie_conversations.slack_genie_conversations (
 thread_ts VARCHAR,
 genie_conversation_id VARCHAR,
 slack_channel VARCHAR
@@ -213,7 +215,7 @@ Go to Settings → Community Nodes → Enter `n8n-nodes-databricks`.
 ## Usage
 
 - In your designated Slack channel, tag the Slack App bot and ask a question about your dataset.
-- The bot will process your request, query Genie via Databricks, and respond in the thread.
+- The bot will send your message to the Genie space, Genie will generate a query that is executed by a SQL Warehouse in Databricks and the final results are summarized by a Databricks Foundation Model and posted in the thread.
 - Conversations are created for each individual thread. To continue a conversation with full context, reply within the same thread.
 
 ![Example of Multi-turn Conversation in Slack](images/example_of_conversation_slack_thread.png)
