@@ -266,7 +266,7 @@
           "values": [
             {
               "column": "thread_ts",
-              "value": "={{ $('Receive Slack message').item.json.thread_ts }}"
+              "value": "={{ $('Receive Slack message').item.json.thread_ts ? $('Receive Slack message').item.json.thread_ts : $('Receive Slack message').item.json.event_ts }}"
             },
             {
               "column": "slack_channel",
@@ -287,30 +287,10 @@
       "alwaysOutputData": true,
       "credentials": {
         "postgres": {
-          "id": "6nRi6Dp3kAhdYz6N",
+          "id": "9BSkLb3B4YWpUTvp",
           "name": "Postgres account"
         }
       }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "boolean": [
-            {
-              "value1": "={{ $json.isNotEmpty() }}",
-              "value2": "={{ true }}"
-            }
-          ]
-        }
-      },
-      "name": "User Exists?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        -1500,
-        660
-      ],
-      "id": "51e243ef-2ce9-454e-82fa-cb64f931177a"
     },
     {
       "parameters": {
@@ -375,7 +355,7 @@
       "alwaysOutputData": true,
       "credentials": {
         "postgres": {
-          "id": "6nRi6Dp3kAhdYz6N",
+          "id": "9BSkLb3B4YWpUTvp",
           "name": "Postgres account"
         }
       }
@@ -632,6 +612,26 @@
       ],
       "id": "d28d05cf-a353-4f47-ba30-00269b9b24fc",
       "name": "Format Error Message"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.isNotEmpty() }}",
+              "value2": "={{ true }}"
+            }
+          ]
+        }
+      },
+      "name": "Conversation Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1500,
+        660
+      ],
+      "id": "51e243ef-2ce9-454e-82fa-cb64f931177a"
     }
   ],
   "pinData": {},
@@ -749,25 +749,7 @@
       "main": [
         [
           {
-            "node": "User Exists?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "User Exists?": {
-      "main": [
-        [
-          {
-            "node": "Create Message",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Start Conversation",
+            "node": "Conversation Exists?",
             "type": "main",
             "index": 0
           }
@@ -912,16 +894,34 @@
           }
         ]
       ]
+    },
+    "Conversation Exists?": {
+      "main": [
+        [
+          {
+            "node": "Create Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Start Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "7d46ce94-1ef3-43a8-af95-48488d678ddf",
+  "versionId": "15eb2514-64ce-487d-afbf-044a4b74c091",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "66dfec447a4ca2b712d39e7bfecf838f23b3eecc4d0e6d3ce3ac05d3f711cae0"
+    "instanceId": "862c14199825082700a8f6f09ae8e5578708e8168c5874ba5cc362fd5f66b43b"
   },
   "id": "EFsH7GkIpAesAeVz",
   "tags": []
