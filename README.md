@@ -104,7 +104,7 @@ dbdemos.install('aibi-marketing-campaign', catalog = "<insert_catalog_name>")
 **Summary:**
 - Go to [Slack API: Your Apps](https://api.slack.com/apps) and create a new app.
 
-- Add Bot Token Scopes: `app_mentions:read`, `chat:write`, `channels:history`.
+- Add Bot Token Scopes: `app_mentions:read`, `channels:read`, `chat:write`, `groups:read`, `users:read`
 
 - Enable Events and set the Request URL to your n8n webhook URL. 
     - Use the Production webhook URL when you want to 'Activate' the workflow to consistently listen for Slack events. Otherwise, use the Test webhook URL for ad hoc execution of the workflow in 'Inactive' mode.
