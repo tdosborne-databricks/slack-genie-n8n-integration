@@ -169,7 +169,7 @@ For more details, see the [Databricks documentation on secret management](https:
 ```bash
 databricks bundle validate
 databricks bundle deploy
-databricks bundle run n8n-databricks-app
+databricks bundle run n8n_databricks_app
 ```
 
 - Use `databricks bundle summary` to retrieve the app resource URL and verify deployment.
