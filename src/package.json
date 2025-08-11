@@ -4,9 +4,7 @@
   "description": "Run n8n as Databricks Apps",
   "main": "index.js",
   "dependencies": {
-    "@mbakgun/n8n-nodes-slack-socket-mode": "^1.2.5",
-    "n8n": "^1.90.0",
-    "n8n-nodes-databricks": "^0.2.6"
+    "n8n": "^1.90.0"
   },
   "scripts": {
     "install-community-nodes": "mkdir -p ~/.n8n/nodes && cd ~/.n8n/nodes && npm i --legacy-peer-deps @mbakgun/n8n-nodes-slack-socket-mode n8n-nodes-databricks",
