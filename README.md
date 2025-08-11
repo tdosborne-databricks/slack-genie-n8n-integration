@@ -13,7 +13,7 @@ This accelerator enables your business to interact with Databricks datasets conv
 - [Installation Steps](#installation-steps)
   - [1. Set Up Managed Postgres (Lakebase)](#1-set-up-managed-postgres-lakebase)
   - [2. Install AI/BI Marketing Campaign Demo via dbdemos](#2-install-aibi-marketing-campaign-demo-via-dbdemos)
-  - [3. Set Up ngrok Account](#3-set-up-ngrok-account)
+  - [3. Set Up ngrok Account (Optional)](#3-set-up-ngrok-account)
   - [4. Create Slack App](#4-create-slack-app)
   - [5. Create Databricks Secrets and Deploy Databricks App](#5-create-databricks-secrets-and-deploy-databricks-app)
   - [6. Configure n8n Instance](#6-configure-n8n-instance)
@@ -29,10 +29,11 @@ This accelerator enables your business to interact with Databricks datasets conv
     - Stores mapping between Slack threads and Genie conversation IDs 
     - Database used by n8n instance for persisting user data.
 - **dbdemos:** Required for installing the `aibi-marketing-campaign` demo asset.
-- **ngrok:** Exposes n8n webhook endpoints to Slack for event delivery.
+- **ngrok (Optional):** Exposes n8n webhook endpoints to Slack for event delivery.
 - **Slack App:** Custom bot for receiving and responding to user queries in Slack.
 - **Databricks Asset Bundles:** Used to deploy App resource in the Databricks Workspace.
 - **Databricks Community Nodes Package:** Required for workflow execution.
+- **Slack Socket Mode Community Nodes Package:** Required for receiving Slack events via websocket instead of HTTP.
 - **n8n:** Self-hosted version that orchestrates communication between Slack, Genie API, and Databricks.
 
 ---
@@ -40,10 +41,10 @@ This accelerator enables your business to interact with Databricks datasets conv
 ## Prerequisites
 
 - Databricks workspace with Asset Bundle support.
-- Managed Postgres (Lakebase) instance.
+- Managed Postgres instance (using Lakebase for convience but can work with any Postgres instance). 
 - Necessary permissions to create Databricks App and Genie resources.
 - Slack workspace with permissions to create a custom app.
-- ngrok account for webhook tunneling.
+- ngrok account for webhook tunneling (Optional - Not required if using Slack Socket Mode node).
 - Databricks Access Token with appropriate permissions to use Genie API and Foundation Models API.
 
 ---
@@ -90,9 +91,12 @@ dbdemos.install('aibi-marketing-campaign', catalog = "<insert_catalog_name>")
 
 ---
 
-### 3. Set Up ngrok Account
+### 3. Set Up ngrok Account (Optional)
+
+- **NOTE:** This step is optional if you are using a workflow that receives Slack events via the Slack Socket Mode n8n node. Socket Mode is preferred if your organization has strict requirements and you need to be able to receive Slack events behind a corporate firewall without exposing a webhook via public internet.
 
 - Sign up for an ngrok account and create a new domain.
+
 
 ![ngrok Dashboard: Domains](images/ngrok_dashboard_domains.png)
 ---
@@ -106,14 +110,19 @@ dbdemos.install('aibi-marketing-campaign', catalog = "<insert_catalog_name>")
 
 - Add Bot Token Scopes: `app_mentions:read`, `channels:read`, `chat:write`, `groups:read`, `users:read`
 
-- Enable Events and set the Request URL to your n8n webhook URL. 
+- [Enable Socket Mode](https://api.slack.com/apis/socket-mode) and generate an App Level Token.
+
+![Enable Socket Mode](images/enable_slack_socket_mode.png)
+
+- Enable Events and set the Request URL to your n8n webhook URL (**Optional:** Skip if using the default Slack Socket Mode n8n node). 
+
+    - Subscribe the app to bot events (`app_mention`).
+
+    ![Enable Events](images/enable_events_slack_app.png)
+
     - Use the Production webhook URL when you want to 'Activate' the workflow to consistently listen for Slack events. Otherwise, use the Test webhook URL for ad hoc execution of the workflow in 'Inactive' mode.
 
-- Subscribe the app to bot events (`app_mention`).
-
-![Enable Events](images/enable_events_slack_app.png)
-
-![Identify n8n webhook URL](images/identify_n8n_webhook_url.png)
+    ![Identify n8n webhook URL](images/identify_n8n_webhook_url.png)
 
 - Add the app to your workspace.
 
@@ -128,11 +137,12 @@ You will need to create the following secrets in a designated scope:
 
 | Name               | Scope         | Key               | Permission |
 |--------------------|--------------|-------------------|------------|
-| ngrok-token        | `<name-of-scope>` | ngrok-token       | READ       |
-| ngrok-url          | `<name-of-scope>` | ngrok-url         | READ       |
+| ngrok-token (Optional) | `<name-of-scope>` | ngrok-token       | READ   |
+| ngrok-url (Optional) | `<name-of-scope>` | ngrok-url         | READ     |
 | postgres-password  | `<name-of-scope>` | postgres-password | READ       |
 | postgres-user      | `<name-of-scope>` | postgres-user     | READ       |
 | postgres-host      | `<name-of-scope>` | postgres-host     | READ       |
+| n8n-encryption-key    | `<name-of-scope>` | n8n-encryption-key  | READ  |
 
 **Step 1: Create the secret scope (if not already created):**
 
@@ -143,11 +153,12 @@ databricks secrets create-scope --scope <name-of-scope>
 **Step 2: Add each secret:**
 
 ```bash
-databricks secrets put --scope <name-of-scope> --key ngrok-token --string-value "<your-ngrok-token>"
-databricks secrets put --scope <name-of-scope> --key ngrok-url --string-value "<your-ngrok-url>"
+databricks secrets put --scope <name-of-scope> --key ngrok-token --string-value "<your-ngrok-token>" #Optional: Only needed if receiving Slack events via webhook
+databricks secrets put --scope <name-of-scope> --key ngrok-url --string-value "<your-ngrok-url>" #Optional: Only needed if receiving Slack events via webhook
 databricks secrets put --scope <name-of-scope> --key postgres-password --string-value "<your-postgres-password>"
 databricks secrets put --scope <name-of-scope> --key postgres-user --string-value "<your-postgres-user>"
 databricks secrets put --scope <name-of-scope> --key postgres-host --string-value "<your-postgres-host>"
+databricks secrets put --scope <name-of-scope> --key n8n-encryption-key --string-value "<random-32-byte-base64-encoded-string>" #This encryption key is used for encrypting credentials thare are stored in Postgres DB after created in n8n app via GUI. One method for generating this secure key is using OpenSSL command in Linux
 ```
 
 
@@ -180,11 +191,16 @@ databricks bundle run n8n_databricks_app
 
 - Access your n8n instance via the URL provided by your Databricks App deployment.
 
-- Install the Databricks Community Node: 
+- Install Community Nodes: 
 
-Go to Settings → Community Nodes → Enter `n8n-nodes-databricks`.
+    - **NOTE:** The scripts included in package.json should automatically install the community nodes within the directory that n8n expects (~/.n8n/nodes) but if you do not see those nodes available then proceed with the installation via the GUI.
 
-![Install Databricks Community Node](images/install_databricks_community_node.png)
+    - Go to Settings → Community Nodes → Enter `n8n-nodes-databricks`.
+
+    ![Install Databricks Community Node](images/install_databricks_community_node.png)
+
+    - Repeat installation steps for `@mbakgun/n8n-nodes-slack-socket-mode`
+
 
 - Import the provided Workflow JSON (`slack_genie_integration_workflow.json`).
 
@@ -192,19 +208,16 @@ Go to Settings → Community Nodes → Enter `n8n-nodes-databricks`.
 
 - Add and configure credentials for:
     - Slack (OAuth token)
+    - Slack Socket Mode (Bot OAuth Token, App-Level Token, Signing Secret - Find App-Level Token + Signing Secret here: https://api.slack.com/apps/<your-app-id>/general) 
     - Postgres (use connection details from Databricks Workspace - Compute UI and the credentials created earlier)
     - Databricks (Access Token)
-    - **NOTE:** You will need to open each node with a red warning icon and select the corresponding credentials from the dropdown at the top of the form.
+    - **NOTE:** Only for the initial import, you will need to open each node with a red warning icon and select the corresponding credentials from the dropdown at the top of the form.
 
 ![Setting up Credentials](images/setting_up_credentials.png)
 
 - Replace the space_id in the `Set Genie Space` node with your Genie space's Space ID (found in the Genie Space URL).
 
 ![Set Genie Space ID](images/set_genie_space_id.png)
-
-- Set the specified channel(s) in 'Channel to Watch' dropdown for the `Receive Slack Message` node;
-
-![Set Slack Channel(s)](images/set_slack_channel.png)
 
 - Activate the workflow.
 
