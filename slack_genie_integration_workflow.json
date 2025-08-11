@@ -211,12 +211,18 @@
       "type": "n8n-nodes-base.slackTrigger",
       "typeVersion": 1,
       "position": [
-        -2784,
-        784
+        -2688,
+        768
       ],
       "id": "f6beadd4-d664-4c80-bef8-23b8545a3383",
       "name": "Receive Slack message",
       "webhookId": "5686c6f0-f248-4929-9e5a-d155c78eb667",
+      "credentials": {
+        "slackApi": {
+          "id": "hnoYjfBoWzJ4cLPb",
+          "name": "Slack account"
+        }
+      },
       "disabled": true
     },
     {
@@ -710,143 +716,14 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -2448,
-        560
+        -2416,
+        640
       ],
       "id": "fa8a7c3a-2d14-4ea9-8c50-0eaccec9b291",
       "name": "Set Slack Event"
     }
   ],
-  "pinData": {
-    "Slack Socket Mode Trigger": [
-      {
-        "json": {
-          "body": {
-            "token": "5IQJn1SSg7fDbeEoCPlJ0WAQ",
-            "team_id": "T094KACVBE2",
-            "api_app_id": "A094PLSPYPL",
-            "event": {
-              "user": "U094KAD0P5L",
-              "type": "app_mention",
-              "ts": "1754921718.478309",
-              "client_msg_id": "76746295-c7b6-4450-afd1-f85499c6f4f5",
-              "text": "<@U094RH9QJ84> this is a test",
-              "team": "T094KACVBE2",
-              "blocks": [
-                {
-                  "type": "rich_text",
-                  "block_id": "15cLF",
-                  "elements": [
-                    {
-                      "type": "rich_text_section",
-                      "elements": [
-                        {
-                          "type": "user",
-                          "user_id": "U094RH9QJ84"
-                        },
-                        {
-                          "type": "text",
-                          "text": " this is a test"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ],
-              "channel": "C094KAMLXJS",
-              "event_ts": "1754921718.478309"
-            },
-            "type": "event_callback",
-            "event_id": "Ev099UCMG7DG",
-            "event_time": 1754921718,
-            "authorizations": [
-              {
-                "enterprise_id": null,
-                "team_id": "T094KACVBE2",
-                "user_id": "U094RH9QJ84",
-                "is_bot": true,
-                "is_enterprise_install": false
-              }
-            ],
-            "is_ext_shared_channel": false,
-            "event_context": "4-eyJldCI6ImFwcF9tZW50aW9uIiwidGlkIjoiVDA5NEtBQ1ZCRTIiLCJhaWQiOiJBMDk0UExTUFlQTCIsImNpZCI6IkMwOTRLQU1MWEpTIn0"
-          },
-          "payload": {
-            "user": "U094KAD0P5L",
-            "type": "app_mention",
-            "ts": "1754921718.478309",
-            "client_msg_id": "76746295-c7b6-4450-afd1-f85499c6f4f5",
-            "text": "<@U094RH9QJ84> this is a test",
-            "team": "T094KACVBE2",
-            "blocks": [
-              {
-                "type": "rich_text",
-                "block_id": "15cLF",
-                "elements": [
-                  {
-                    "type": "rich_text_section",
-                    "elements": [
-                      {
-                        "type": "user",
-                        "user_id": "U094RH9QJ84"
-                      },
-                      {
-                        "type": "text",
-                        "text": " this is a test"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ],
-            "channel": "C094KAMLXJS",
-            "event_ts": "1754921718.478309"
-          },
-          "context": {
-            "isEnterpriseInstall": false,
-            "botToken": "xoxb-9155352997478-9161587834276-aeqtSIwxFZxTmihEU5hsyBJ8",
-            "botUserId": "U094RH9QJ84",
-            "botId": "B094RH9Q97E",
-            "userId": "U094KAD0P5L",
-            "teamId": "T094KACVBE2",
-            "retryNum": 0,
-            "retryReason": ""
-          },
-          "event": {
-            "user": "U094KAD0P5L",
-            "type": "app_mention",
-            "ts": "1754921718.478309",
-            "client_msg_id": "76746295-c7b6-4450-afd1-f85499c6f4f5",
-            "text": "<@U094RH9QJ84> this is a test",
-            "team": "T094KACVBE2",
-            "blocks": [
-              {
-                "type": "rich_text",
-                "block_id": "15cLF",
-                "elements": [
-                  {
-                    "type": "rich_text_section",
-                    "elements": [
-                      {
-                        "type": "user",
-                        "user_id": "U094RH9QJ84"
-                      },
-                      {
-                        "type": "text",
-                        "text": " this is a test"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ],
-            "channel": "C094KAMLXJS",
-            "event_ts": "1754921718.478309"
-          }
-        }
-      }
-    ]
-  },
+  "pinData": {},
   "connections": {
     "Check Timeout": {
       "main": [
@@ -939,7 +816,7 @@
       "main": [
         [
           {
-            "node": "Set Genie Space",
+            "node": "Set Slack Event",
             "type": "main",
             "index": 0
           }
@@ -1163,8 +1040,9 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "6d2ec696-6103-4376-9f70-5ea536cc5583",
+  "versionId": "27962f9c-4adb-4236-bf61-eff11094f213",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "18f2592c5f4dc237bb9cf68aba4b051594266d0ba71f1a32775856beee687965"
   },
   "id": "qbmGTD16hKTcD2C7",
