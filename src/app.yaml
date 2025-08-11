@@ -8,10 +8,12 @@ env:
   value: 'true'
 - name: DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED
   value: 'false'
-- name: WEBHOOK_URL
-  valueFrom: ngrok-url
-- name: NGROK_TOKEN
-  valueFrom: ngrok-token
+- name: N8N_ENCRYPTION_KEY
+  valueFrom: n8n-encryption-key
+- name: N8N_REINSTALL_MISSING_PACKAGES
+  value: 'true'
+- name: N8N_COMMUNITY_PACKAGES_ENABLED
+  value: 'true'
 
 # Database configuration
 - name: DB_TYPE
