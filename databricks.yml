@@ -8,35 +8,31 @@ resources:
       source_code_path: src # This assumes the app source code is at the root of the project.
       description: 'A Databricks app which self hosts n8n for building workflows'
       resources:
-        - name: 'ngrok-token'
-          secret:
-            scope: <your-scope-name>
-            key: ngrok-token
-            permission: READ
-        - name: 'ngrok-url'
-          secret:
-            scope: <your-scope-name>
-            key: ngrok-url
-            permission: READ
         - name: 'postgres-password'
           secret:
-            scope: <your-scope-name>
+            scope: <your-scope>
             key: postgres-password
             permission: READ
         - name: 'postgres-user'
           secret:
-            scope: <your-scope-name>
+            scope: <your-scope>
             key: postgres-user
             permission: READ
         - name: 'postgres-host'
           secret:
-            scope: <your-scope-name>
+            scope: <your-scope>
             key: postgres-host
             permission: READ
+        - name: 'n8n-encryption-key'
+          secret:
+            scope: <your-scope>
+            key: n8n-encryption-key
+            permission: READ
+
 
 targets:
   dev:
     mode: development
     default: true
     workspace:
-      host: <your-databricks-workspace-host>
+      host: <your-databricks-host>

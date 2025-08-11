@@ -1,5 +1,5 @@
 {
-  "name": "Slack Genie Bot",
+  "name": "Slack Genie Workflow",
   "nodes": [
     {
       "parameters": {
@@ -16,10 +16,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        60,
-        780
+        64,
+        784
       ],
-      "id": "b4013579-69df-45aa-970a-bd4f326b2aa4",
+      "id": "b1ea0223-c91b-4db0-9d1d-cfc5293d0b09",
       "name": "Check Timeout"
     },
     {
@@ -29,10 +29,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        280,
-        920
+        288,
+        928
       ],
-      "id": "b7545c16-9073-4f24-b081-6cfb9a2e1153",
+      "id": "cfd96cd5-b68b-4b7c-859a-11bd23afcf43",
       "name": "Wait Backoff",
       "webhookId": "32902320-46ac-4317-9932-5372f94f23f2"
     },
@@ -72,10 +72,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1940,
-        660
+        -2000,
+        672
       ],
-      "id": "58cae5a8-6375-46a0-a39b-c7da63aa329a",
+      "id": "64404b0f-08df-48e7-af66-637e6fc0b2c3",
       "name": "Set Backoff Params"
     },
     {
@@ -86,10 +86,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -180,
-        780
+        -176,
+        784
       ],
-      "id": "9f41dbba-6df0-4b7d-929c-c13ea7f0bf4d",
+      "id": "32e740b5-4596-4602-bad9-a2da205a7440",
       "name": "Code"
     },
     {
@@ -101,10 +101,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1860,
-        300
+        -1856,
+        304
       ],
-      "id": "04d6fcfd-779b-4dd6-af42-f67a31b947f7",
+      "id": "2615c30d-a8ef-4084-ad23-ab9f295bc8ec",
       "name": "Sticky Note5"
     },
     {
@@ -135,10 +135,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        60,
+        64,
         480
       ],
-      "id": "a9da2205-8604-4da1-9c6c-79dcdf8adb6e",
+      "id": "bb745ed3-b5f4-491c-980c-d2f78f1c6204",
       "name": "Check response content",
       "notesInFlow": false
     },
@@ -171,9 +171,9 @@
       "typeVersion": 2.2,
       "position": [
         -400,
-        580
+        592
       ],
-      "id": "2a72047d-f822-4257-bfb9-5c28c85e0bf2",
+      "id": "bb0a1565-4af0-4253-be07-ae3aee313362",
       "name": "Check response status",
       "notesInFlow": true,
       "alwaysOutputData": false
@@ -190,7 +190,7 @@
         0,
         0
       ],
-      "id": "4660350c-3231-4a61-a6e7-8319462c0b3e",
+      "id": "99e46807-bf8c-4054-9d89-28e5de7ea3cd",
       "name": "Sticky Note1"
     },
     {
@@ -211,18 +211,13 @@
       "type": "n8n-nodes-base.slackTrigger",
       "typeVersion": 1,
       "position": [
-        -2380,
-        660
+        -2784,
+        784
       ],
-      "id": "bfffd8bc-facb-466a-b590-671af98758a5",
+      "id": "f6beadd4-d664-4c80-bef8-23b8545a3383",
       "name": "Receive Slack message",
       "webhookId": "5686c6f0-f248-4929-9e5a-d155c78eb667",
-      "credentials": {
-        "slackApi": {
-          "id": "bjDWNlbd1Vx2oKq4",
-          "name": "Slack account"
-        }
-      }
+      "disabled": true
     },
     {
       "parameters": {
@@ -241,10 +236,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -2160,
-        660
+        -2192,
+        672
       ],
-      "id": "e7d4f7eb-b4d1-48b7-904d-2f1ea12b03d0",
+      "id": "4c64dc52-fb1f-4ea7-a226-0c00c2624f4c",
       "name": "Set Genie Space"
     },
     {
@@ -266,11 +261,11 @@
           "values": [
             {
               "column": "thread_ts",
-              "value": "={{ $('Receive Slack message').item.json.thread_ts ? $('Receive Slack message').item.json.thread_ts : $('Receive Slack message').item.json.event_ts }}"
+              "value": "={{ $('Set Slack Event').item.json.thread_ts }} ? {{ $('Set Slack Event').item.json.thread_ts }} : {{ $('Set Slack Event').item.json.event_ts }}"
             },
             {
               "column": "slack_channel",
-              "value": "={{ $('Receive Slack message').item.json.channel }}"
+              "value": "={{ $('Set Slack Event').item.json.channel_id }}"
             }
           ]
         },
@@ -279,15 +274,15 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1720,
-        660
+        -1728,
+        672
       ],
-      "id": "ff18c9e4-d8a4-4120-b818-6fdf1dee6199",
+      "id": "18d23740-e10f-459b-87df-63d3601a80b5",
       "name": "Select Existing Conversations",
       "alwaysOutputData": true,
       "credentials": {
         "postgres": {
-          "id": "9BSkLb3B4YWpUTvp",
+          "id": "CHO0qYgFxBAOP7u7",
           "name": "Postgres account"
         }
       }
@@ -296,19 +291,19 @@
       "parameters": {
         "resource": "genie",
         "spaceId": "={{  $('Set Genie Space').item.json.space_id }}",
-        "initialMessage": "={{ $('Receive Slack message').item.json.blocks[0].elements[0].elements[1].text }}"
+        "initialMessage": "={{ $('Slack Socket Mode Trigger').item.json.payload.blocks[0].elements[0].elements[1].text }}"
       },
       "type": "n8n-nodes-databricks.databricks",
       "typeVersion": 1,
       "position": [
         -1280,
-        760
+        768
       ],
-      "id": "bf5be9a6-c564-4906-b7ce-dd09e9893998",
+      "id": "64ebb659-10b0-4ddc-bf61-e94db6e6288a",
       "name": "Start Conversation",
       "credentials": {
         "databricks": {
-          "id": "AzGoDFWGKeitm7Yg",
+          "id": "WmIVlVa4LVxl7kgl",
           "name": "Databricks account"
         }
       }
@@ -319,19 +314,19 @@
         "operation": "createMessage",
         "spaceId": "={{  $('Set Genie Space').item.json.space_id }}",
         "conversationId": "={{ $json.genie_conversation_id }}",
-        "message": "={{ $('Receive Slack message').item.json.blocks[0].elements[0].elements[1].text }}"
+        "message": "={{ $('Slack Socket Mode Trigger').item.json.payload.blocks[0].elements[0].elements[1].text }}"
       },
       "type": "n8n-nodes-databricks.databricks",
       "typeVersion": 1,
       "position": [
-        -1060,
+        -1056,
         560
       ],
-      "id": "f4a994e7-f683-4440-a6df-6e15644e9e17",
+      "id": "ce3c17c0-6cc1-47a4-ae3d-cb790fc87c84",
       "name": "Create Message",
       "credentials": {
         "databricks": {
-          "id": "AzGoDFWGKeitm7Yg",
+          "id": "WmIVlVa4LVxl7kgl",
           "name": "Databricks account"
         }
       }
@@ -341,21 +336,21 @@
         "operation": "executeQuery",
         "query": "-- Insert a new row for the specific slack_user_id with is_active set to true\nINSERT INTO databricks_postgres.genie_conversations.slack_genie_conversations (genie_conversation_id, slack_channel, slack_channel_resolved, thread_ts)\nVALUES ($1, $2, $3, $4);",
         "options": {
-          "queryReplacement": "={{ $('Start Conversation').item.json.conversation_id }}, {{ $('Receive Slack message').item.json.channel }}, {{ $('Receive Slack message').item.json.channel_resolved }},{{ $('Receive Slack message').item.json.event_ts }} "
+          "queryReplacement": "={{ $('Start Conversation').item.json.conversation_id }},{{ $('Set Slack Event').item.json.channel_id }} , {{ $('Set Slack Event').item.json.channel_name }},{{ $('Set Slack Event').item.json.event_ts }}"
         }
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1060,
-        760
+        -1056,
+        768
       ],
-      "id": "0071ec3e-f8d7-421a-8cc7-2c0c377b7180",
+      "id": "800d1bc6-3579-4e5e-a593-f5e44ca7d6b3",
       "name": "Insert Conversation ID for thread_ts",
       "alwaysOutputData": true,
       "credentials": {
         "postgres": {
-          "id": "9BSkLb3B4YWpUTvp",
+          "id": "CHO0qYgFxBAOP7u7",
           "name": "Postgres account"
         }
       }
@@ -371,14 +366,14 @@
       "type": "n8n-nodes-databricks.databricks",
       "typeVersion": 1,
       "position": [
-        -620,
-        660
+        -624,
+        672
       ],
-      "id": "1bcae92a-cb39-4fe8-80a2-f24a0c6ac27d",
+      "id": "1e82eeea-6d9e-4836-8546-c388c44f7fe7",
       "name": "Get Message",
       "credentials": {
         "databricks": {
-          "id": "AzGoDFWGKeitm7Yg",
+          "id": "WmIVlVa4LVxl7kgl",
           "name": "Databricks account"
         }
       }
@@ -403,7 +398,7 @@
         560,
         640
       ],
-      "id": "9f9aee49-41f8-415f-8ec1-194a42041755",
+      "id": "61de01ed-ebbb-4885-af8d-86de88c6c7a5",
       "name": "Format text output",
       "notesInFlow": false
     },
@@ -419,14 +414,14 @@
       "type": "n8n-nodes-databricks.databricks",
       "typeVersion": 1,
       "position": [
-        280,
-        340
+        288,
+        352
       ],
-      "id": "c3fee91b-8f40-42a4-a8de-9545f46cb80f",
+      "id": "7a206464-ecd0-4295-9aa8-de18ef4d5963",
       "name": "Get Query Results",
       "credentials": {
         "databricks": {
-          "id": "AzGoDFWGKeitm7Yg",
+          "id": "WmIVlVa4LVxl7kgl",
           "name": "Databricks account"
         }
       }
@@ -439,14 +434,14 @@
       "type": "n8n-nodes-databricks.lmChatDatabricks",
       "typeVersion": 1,
       "position": [
-        580,
-        460
+        592,
+        464
       ],
-      "id": "d031918e-2e94-460a-964b-2df2c3d6e8b8",
+      "id": "9da30ba3-b933-4499-8cfd-8e6525d5a952",
       "name": "Databricks Chat Model",
       "credentials": {
         "databricks": {
-          "id": "AzGoDFWGKeitm7Yg",
+          "id": "WmIVlVa4LVxl7kgl",
           "name": "Databricks account"
         }
       }
@@ -466,10 +461,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.6,
       "position": [
-        500,
+        512,
         240
       ],
-      "id": "fc992e57-619c-4839-b7e6-506fb9146d00",
+      "id": "6bd9e897-8a69-424f-9923-2b610695949e",
       "name": "Summarize query attachment",
       "onError": "continueErrorOutput"
     },
@@ -490,10 +485,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        860,
-        580
+        864,
+        592
       ],
-      "id": "2041b22e-bba8-458c-ad58-103387143b56",
+      "id": "cba25009-2491-4a0f-9d8d-6750178eef19",
       "name": "Edit Fields"
     },
     {
@@ -501,16 +496,15 @@
         "select": "channel",
         "channelId": {
           "__rl": true,
-          "value": "C0923GP1C7J",
-          "mode": "list",
-          "cachedResultName": "dbdemos-ai-bi-marketing-campaign-genie-space"
+          "value": "={{ $('Set Slack Event').item.json.channel_id }}",
+          "mode": "id"
         },
         "text": "={{ $json.text }}",
         "otherOptions": {
           "includeLinkToWorkflow": false,
           "thread_ts": {
             "replyValues": {
-              "thread_ts": "={{ $('Receive Slack message').first().json.ts }}"
+              "thread_ts": "={{ $('Set Slack Event').item.json.event_ts }}"
             }
           },
           "mrkdwn": true
@@ -519,15 +513,15 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.3,
       "position": [
-        1080,
+        1088,
         480
       ],
-      "id": "1bf8a912-a136-4dd1-b56b-37b0bd1d0fee",
+      "id": "b730bf05-ff49-4c51-b52b-3f3bcc35d968",
       "name": "Send Genie response",
       "webhookId": "9b164ec1-f2d6-4ac0-a3da-fb6fb4130cad",
       "credentials": {
         "slackApi": {
-          "id": "bjDWNlbd1Vx2oKq4",
+          "id": "hnoYjfBoWzJ4cLPb",
           "name": "Slack account"
         }
       }
@@ -555,10 +549,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -840,
-        760
+        -848,
+        768
       ],
-      "id": "fca24f4c-dfc9-4c16-b9c5-29b87cf7c5b9",
+      "id": "bc7b2f70-7ff1-42ee-ae49-e6229141afda",
       "name": "Set Fields for New Conversation"
     },
     {
@@ -584,10 +578,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -840,
+        -848,
         560
       ],
-      "id": "c0808e7c-591c-4959-841e-ac09d15de64f",
+      "id": "55f8e392-c321-4e6e-9f36-9494e14a5421",
       "name": "Set Fields for Existing Conversation"
     },
     {
@@ -607,10 +601,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        860,
-        280
+        864,
+        288
       ],
-      "id": "d28d05cf-a353-4f47-ba30-00269b9b24fc",
+      "id": "08e0f580-4a13-4c1c-8c0e-b0aea80c77e0",
       "name": "Format Error Message"
     },
     {
@@ -628,13 +622,231 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        -1500,
-        660
+        -1504,
+        672
       ],
-      "id": "51e243ef-2ce9-454e-82fa-cb64f931177a"
+      "id": "a099aabf-1b07-44d7-8f89-dbc59206153c"
+    },
+    {
+      "parameters": {
+        "trigger": [
+          "app_mention"
+        ]
+      },
+      "type": "@mbakgun/n8n-nodes-slack-socket-mode.slackSocketTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2752,
+        560
+      ],
+      "id": "db09f494-ef89-41d4-9fa4-ad70f1831ee3",
+      "name": "Slack Socket Mode Trigger",
+      "credentials": {
+        "slackSocketCredentialsApi": {
+          "id": "DA9k00L4jEZTLAAz",
+          "name": "Slack Socket Mode Credentials account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "channel",
+        "operation": "get",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $json.body.event.channel }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -2592,
+        560
+      ],
+      "id": "d362b1f9-b080-46a5-b31c-92f1ad25b4ab",
+      "name": "Get a channel",
+      "webhookId": "4e31b143-ef0b-4fa4-9a9a-3b9547da47ca",
+      "credentials": {
+        "slackApi": {
+          "id": "hnoYjfBoWzJ4cLPb",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3ecba06-07a8-4e44-9496-8.852456e+11",
+              "name": "channel_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "01a3f4b9-0ad9-46f2-a25d-5a3672ed06ec",
+              "name": "event_ts",
+              "value": "={{ $('Slack Socket Mode Trigger').item.json.payload.event_ts }}",
+              "type": "string"
+            },
+            {
+              "id": "fa6be155-9886-4bf0-922c-7b727340c9df",
+              "name": "thread_ts",
+              "value": "={{ $('Slack Socket Mode Trigger').item.json.payload.thread_ts }} ? {{ $('Slack Socket Mode Trigger').item.json.payload.thread_ts }} : {{ null }}",
+              "type": "string"
+            },
+            {
+              "id": "a01aa187-6ae1-43f4-955f-90cf82a36d9b",
+              "name": "channel_name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2448,
+        560
+      ],
+      "id": "fa8a7c3a-2d14-4ea9-8c50-0eaccec9b291",
+      "name": "Set Slack Event"
     }
   ],
-  "pinData": {},
+  "pinData": {
+    "Slack Socket Mode Trigger": [
+      {
+        "json": {
+          "body": {
+            "token": "5IQJn1SSg7fDbeEoCPlJ0WAQ",
+            "team_id": "T094KACVBE2",
+            "api_app_id": "A094PLSPYPL",
+            "event": {
+              "user": "U094KAD0P5L",
+              "type": "app_mention",
+              "ts": "1754921718.478309",
+              "client_msg_id": "76746295-c7b6-4450-afd1-f85499c6f4f5",
+              "text": "<@U094RH9QJ84> this is a test",
+              "team": "T094KACVBE2",
+              "blocks": [
+                {
+                  "type": "rich_text",
+                  "block_id": "15cLF",
+                  "elements": [
+                    {
+                      "type": "rich_text_section",
+                      "elements": [
+                        {
+                          "type": "user",
+                          "user_id": "U094RH9QJ84"
+                        },
+                        {
+                          "type": "text",
+                          "text": " this is a test"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "channel": "C094KAMLXJS",
+              "event_ts": "1754921718.478309"
+            },
+            "type": "event_callback",
+            "event_id": "Ev099UCMG7DG",
+            "event_time": 1754921718,
+            "authorizations": [
+              {
+                "enterprise_id": null,
+                "team_id": "T094KACVBE2",
+                "user_id": "U094RH9QJ84",
+                "is_bot": true,
+                "is_enterprise_install": false
+              }
+            ],
+            "is_ext_shared_channel": false,
+            "event_context": "4-eyJldCI6ImFwcF9tZW50aW9uIiwidGlkIjoiVDA5NEtBQ1ZCRTIiLCJhaWQiOiJBMDk0UExTUFlQTCIsImNpZCI6IkMwOTRLQU1MWEpTIn0"
+          },
+          "payload": {
+            "user": "U094KAD0P5L",
+            "type": "app_mention",
+            "ts": "1754921718.478309",
+            "client_msg_id": "76746295-c7b6-4450-afd1-f85499c6f4f5",
+            "text": "<@U094RH9QJ84> this is a test",
+            "team": "T094KACVBE2",
+            "blocks": [
+              {
+                "type": "rich_text",
+                "block_id": "15cLF",
+                "elements": [
+                  {
+                    "type": "rich_text_section",
+                    "elements": [
+                      {
+                        "type": "user",
+                        "user_id": "U094RH9QJ84"
+                      },
+                      {
+                        "type": "text",
+                        "text": " this is a test"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "channel": "C094KAMLXJS",
+            "event_ts": "1754921718.478309"
+          },
+          "context": {
+            "isEnterpriseInstall": false,
+            "botToken": "xoxb-9155352997478-9161587834276-aeqtSIwxFZxTmihEU5hsyBJ8",
+            "botUserId": "U094RH9QJ84",
+            "botId": "B094RH9Q97E",
+            "userId": "U094KAD0P5L",
+            "teamId": "T094KACVBE2",
+            "retryNum": 0,
+            "retryReason": ""
+          },
+          "event": {
+            "user": "U094KAD0P5L",
+            "type": "app_mention",
+            "ts": "1754921718.478309",
+            "client_msg_id": "76746295-c7b6-4450-afd1-f85499c6f4f5",
+            "text": "<@U094RH9QJ84> this is a test",
+            "team": "T094KACVBE2",
+            "blocks": [
+              {
+                "type": "rich_text",
+                "block_id": "15cLF",
+                "elements": [
+                  {
+                    "type": "rich_text_section",
+                    "elements": [
+                      {
+                        "type": "user",
+                        "user_id": "U094RH9QJ84"
+                      },
+                      {
+                        "type": "text",
+                        "text": " this is a test"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "channel": "C094KAMLXJS",
+            "event_ts": "1754921718.478309"
+          }
+        }
+      }
+    ]
+  },
   "connections": {
     "Check Timeout": {
       "main": [
@@ -912,17 +1124,49 @@
           }
         ]
       ]
+    },
+    "Slack Socket Mode Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a channel": {
+      "main": [
+        [
+          {
+            "node": "Set Slack Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Slack Event": {
+      "main": [
+        [
+          {
+            "node": "Set Genie Space",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "15eb2514-64ce-487d-afbf-044a4b74c091",
+  "versionId": "6d2ec696-6103-4376-9f70-5ea536cc5583",
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "862c14199825082700a8f6f09ae8e5578708e8168c5874ba5cc362fd5f66b43b"
+    "instanceId": "18f2592c5f4dc237bb9cf68aba4b051594266d0ba71f1a32775856beee687965"
   },
-  "id": "EFsH7GkIpAesAeVz",
+  "id": "qbmGTD16hKTcD2C7",
   "tags": []
 }
