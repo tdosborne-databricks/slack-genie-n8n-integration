@@ -4,28 +4,28 @@ bundle:
 resources:
   apps:
     n8n_databricks_app:
-      name: 'n8n-databricks-app'
+      name: 'n8n-databricks-app-to'
       source_code_path: src # This assumes the app source code is at the root of the project.
       description: 'A Databricks app which self hosts n8n for building workflows'
       resources:
         - name: 'postgres-password'
           secret:
-            scope: <your-scope>
+            scope: trevorosborne
             key: postgres-password
             permission: READ
         - name: 'postgres-user'
           secret:
-            scope: <your-scope>
+            scope: trevorosborne
             key: postgres-user
             permission: READ
         - name: 'postgres-host'
           secret:
-            scope: <your-scope>
+            scope: trevorosborne
             key: postgres-host
             permission: READ
         - name: 'n8n-encryption-key'
           secret:
-            scope: <your-scope>
+            scope: trevorosborne
             key: n8n-encryption-key
             permission: READ
 
@@ -35,4 +35,4 @@ targets:
     mode: development
     default: true
     workspace:
-      host: <your-databricks-host>
+      host: https://e2-dogfood.staging.cloud.databricks.com/
