@@ -113,7 +113,7 @@ dbdemos.install('aibi-marketing-campaign', catalog = "<insert_catalog_name>")
 
 ### 3. Set Up ngrok Account (Optional)
 
-- **NOTE:** This step is optional if you are using a workflow that receives Slack events via the Slack Socket Mode n8n node. Socket Mode is preferred if your organization has strict requirements and you need to be able to receive Slack events behind a corporate firewall without exposing a webhook via public internet.
+- **NOTE:** This step is optional if you are using a workflow that receives Slack events via the default Slack n8n node (HTTP/webhook). Socket Mode is preferred if your organization has strict requirements and you need to be able to receive Slack events behind a corporate firewall without exposing a webhook via public internet.
 
 - Sign up for an ngrok account and create a new domain.
 
@@ -279,6 +279,17 @@ After importing the workflows, you'll need to configure the following settings i
 **In the "Slack Socket Mode Trigger" node:**
 - Update the `channelsToWatch` value with your Slack channel ID
 - The channel ID can be found by right-clicking on the channel in Slack and selecting "Copy link" - it's the alphanumeric string at the end of the URL (e.g., `C094KAMLXJS`)
+
+**Optional: If using the Slack Webhook node instead of Socket Mode:**
+- The workflow includes a disabled "Receive Slack message" webhook node as an alternative to Socket Mode
+- If you prefer to use webhooks, you'll need to:
+  1. Disable the "Slack Socket Mode Trigger" node
+  2. Enable the "Receive Slack message" webhook node
+  3. Configure the webhook URL in your Slack app settings:
+     - **For published workflows:** Use the Production webhook URL to consistently listen for Slack events
+     - **For local testing:** Use the Test webhook URL for ad hoc execution within the n8n app
+
+![Identify n8n webhook URL](images/identify_n8n_webhook_url.png)
 
 ![Set Genie Space ID](images/set_genie_space_id.png)
 
