@@ -238,7 +238,7 @@ The error workflow automatically handles failures from the main workflow and not
 Add and configure credentials for:
 - **Slack API** (OAuth token) - Required for sending messages
 - **Slack Socket Mode** (Bot OAuth Token, App-Level Token, Signing Secret)
-  - Find App-Level Token + Signing Secret at: https://api.slack.com/apps/<your-app-id>/general
+  - Find App-Level Token + Signing Secret at: https://api.slack.com/apps/`<your-app-id>`/general
 - **Postgres** - Use connection details and credentials created in Step 1
 - **Databricks** (Access Token) - For Genie API and Foundation Models access
 - **n8n API** (API Key) - **Required for error workflow**
