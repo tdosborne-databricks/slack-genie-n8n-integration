@@ -338,7 +338,7 @@ Send error message to user in Slack thread
 
 - **Slack Socket Mode**: Real-time event streaming from Slack (no webhook polling required)
 - **Databricks Genie**: AI-powered data analytics assistant that converts natural language to SQL
-- **PostgreSQL**: Stores conversation thread mappings between Slack threads and Genie conversations
+- **PostgreSQL**: Stores conversation thread mappings (`databricks_postgres.genie_conversations.slack_genie_conversations`)
 - **n8n**: Workflow automation orchestration platform
 - **Llama 4 Maverick**: Large language model for natural language summarization of query results
 - **CSV Conversion**: Binary file generation for downloadable query results
