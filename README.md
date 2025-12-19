@@ -273,12 +273,12 @@ After importing the workflows, you'll need to configure the following settings i
 
 ![Set Genie Space ID](images/set_genie_space_id.png)
 
-#### **Activate Workflows**
+#### **Publish Workflows**
 
-- Activate the **error workflow first** (Slack Genie Error Workflow)
-- Then activate the **main workflow** (Slack Genie Workflow)
+- Publish the **error workflow first** (Slack Genie Error Workflow)
+- Then publish the **main workflow** (Slack Genie Workflow)
 
-![Activate Workflow](images/activate_workflow.png)
+![Publish Workflow](images/publish_workflow.png)
 
 ---
 
