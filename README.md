@@ -261,8 +261,15 @@ Add and configure credentials for:
 
 #### **Configure Genie Space**
 
-- Replace the `space_id` in the `Set Genie Space` node with your Genie space's Space ID (found in the Genie Space URL).
-- Update the `databricks_host` value to match your Databricks workspace URL.
+After importing the workflows, you'll need to configure the following settings in the main workflow:
+
+**In the "Set Genie Space" node:**
+- Replace `space_id` value with your Genie Space ID (found in the Genie Space URL)
+- Update `databricks_host` value to match your Databricks workspace URL (e.g., `https://your-workspace.cloud.databricks.com`)
+
+**In the "Slack Socket Mode Trigger" node:**
+- Update the `channelsToWatch` value with your Slack channel ID
+- The channel ID can be found by right-clicking on the channel in Slack and selecting "Copy link" - it's the alphanumeric string at the end of the URL (e.g., `C094KAMLXJS`)
 
 ![Set Genie Space ID](images/set_genie_space_id.png)
 
