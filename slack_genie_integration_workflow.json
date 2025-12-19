@@ -16,8 +16,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        64,
-        784
+        32,
+        944
       ],
       "id": "b1ea0223-c91b-4db0-9d1d-cfc5293d0b09",
       "name": "Check Timeout"
@@ -86,8 +86,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -176,
-        784
+        -192,
+        944
       ],
       "id": "32e740b5-4596-4602-bad9-a2da205a7440",
       "name": "Code"
@@ -96,7 +96,7 @@
       "parameters": {
         "content": "# Send message to Genie and wait for response",
         "height": 640,
-        "width": 2140
+        "width": 2060
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -135,8 +135,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        64,
-        480
+        -160,
+        544
       ],
       "id": "bb745ed3-b5f4-491c-980c-d2f78f1c6204",
       "name": "Check response content",
@@ -170,8 +170,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -400,
-        592
+        -384,
+        672
       ],
       "id": "bb0a1565-4af0-4253-be07-ae3aee313362",
       "name": "Check response status",
@@ -181,14 +181,14 @@
     {
       "parameters": {
         "content": "# Get result table and generate natural language response",
-        "height": 640,
+        "height": 448,
         "width": 780
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        0,
-        0
+        208,
+        288
       ],
       "id": "99e46807-bf8c-4054-9d89-28e5de7ea3cd",
       "name": "Sticky Note1"
@@ -217,12 +217,6 @@
       "id": "f6beadd4-d664-4c80-bef8-23b8545a3383",
       "name": "Receive Slack message",
       "webhookId": "5686c6f0-f248-4929-9e5a-d155c78eb667",
-      "credentials": {
-        "slackApi": {
-          "id": "hnoYjfBoWzJ4cLPb",
-          "name": "Slack account"
-        }
-      },
       "disabled": true
     },
     {
@@ -233,6 +227,12 @@
               "id": "f3ecba06-07a8-4e44-9496-8.852456e+11",
               "name": "space_id",
               "value": "01f0488564b11b5faa935a71e74cf52f",
+              "type": "string"
+            },
+            {
+              "id": "c269db57-3b3d-4536-92d3-d1c8e570a2e7",
+              "name": "databricks_host",
+              "value": "=https://e2-dogfood.staging.cloud.databricks.com",
               "type": "string"
             }
           ]
@@ -267,7 +267,7 @@
           "values": [
             {
               "column": "thread_ts",
-              "value": "={{ $('Set Slack Event').item.json.thread_ts }} ? {{ $('Set Slack Event').item.json.thread_ts }} : {{ $('Set Slack Event').item.json.event_ts }}"
+              "value": "={{ $('Set Slack Event').item.json.thread_ts ? $('Set Slack Event').item.json.thread_ts : $('Set Slack Event').item.json.event_ts }}"
             },
             {
               "column": "slack_channel",
@@ -391,7 +391,7 @@
             {
               "id": "ab03d536-9d58-4afa-bdbe-0f103838d8bf",
               "name": "text",
-              "value": "={{ $('Get Message').item.json.attachments[0].text.content }}",
+              "value": "={{ $('Get Message').item.json.attachments[0].text.content.replace(/^- /gm, \"* \").replaceAll(\"**\", \"*\") }}",
               "type": "string"
             }
           ]
@@ -401,8 +401,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        560,
-        640
+        752,
+        848
       ],
       "id": "61de01ed-ebbb-4885-af8d-86de88c6c7a5",
       "name": "Format text output",
@@ -420,8 +420,8 @@
       "type": "n8n-nodes-databricks.databricks",
       "typeVersion": 1,
       "position": [
-        288,
-        352
+        224,
+        464
       ],
       "id": "7a206464-ecd0-4295-9aa8-de18ef4d5963",
       "name": "Get Query Results",
@@ -434,14 +434,19 @@
     },
     {
       "parameters": {
-        "model": "databricks-llama-4-maverick",
+        "model": {
+          "__rl": true,
+          "value": "databricks-llama-4-maverick",
+          "mode": "list",
+          "cachedResultName": "databricks-llama-4-maverick"
+        },
         "options": {}
       },
       "type": "n8n-nodes-databricks.lmChatDatabricks",
       "typeVersion": 1,
       "position": [
-        592,
-        464
+        720,
+        608
       ],
       "id": "9da30ba3-b933-4499-8cfd-8e6525d5a952",
       "name": "Databricks Chat Model",
@@ -455,82 +460,17 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Answer this question based on the SQL query results (in JSON): \n- question: {{ $('Get Message').item.json.content }}\n- result description: {{ $('Get Message').item.json.attachments[0].query.description }}\n- result manifest: {{ $json.statement_response.manifest.toJsonString() }}\n- query result: {{ $json.statement_response.result.toJsonString() }}",
-        "messages": {
-          "messageValues": [
-            {
-              "message": "You are given a user question with supporting data and its description and data schema. Answer the user question using provided data and metadata in an easy to digest style. Don't respond with table, rather just summarize the insights that can be obtained in the table.\n\nIf result returned empty, reply that you didn't get a query result and therefore couldn't answer the question."
-            }
-          ]
-        }
+        "text": "=Answer the following question as a data analyst, focusing on clarity and brevity. Base your conclusions strictly on the provided SQL query results. Provide a short summary without extraneous commentary or verbose explanation.\n\nQuestion: {{ $('Get Message').item.json.content }}\n\nResult Description: {{ $('Get Message').item.json.attachments[0].query.description }}\n\nQuery Result: {{ $('Flatten Genie Query Results').all().map(item => item.json).toJsonString() }}"
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.6,
       "position": [
-        512,
-        240
+        720,
+        464
       ],
       "id": "6bd9e897-8a69-424f-9923-2b610695949e",
       "name": "Summarize query attachment",
       "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "cc83fad5-d1c3-4781-bc6a-68d0400b1b8a",
-              "name": "text",
-              "value": "={{ $json.text.replace(/^- /gm, \"* \").replaceAll(\"**\", \"*\") }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        864,
-        592
-      ],
-      "id": "cba25009-2491-4a0f-9d8d-6750178eef19",
-      "name": "Edit Fields"
-    },
-    {
-      "parameters": {
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "={{ $('Set Slack Event').item.json.channel_id }}",
-          "mode": "id"
-        },
-        "text": "={{ $json.text }}",
-        "otherOptions": {
-          "includeLinkToWorkflow": false,
-          "thread_ts": {
-            "replyValues": {
-              "thread_ts": "={{ $('Set Slack Event').item.json.event_ts }}"
-            }
-          },
-          "mrkdwn": true
-        }
-      },
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.3,
-      "position": [
-        1088,
-        480
-      ],
-      "id": "b730bf05-ff49-4c51-b52b-3f3bcc35d968",
-      "name": "Send Genie response",
-      "webhookId": "9b164ec1-f2d6-4ac0-a3da-fb6fb4130cad",
-      "credentials": {
-        "slackApi": {
-          "id": "hnoYjfBoWzJ4cLPb",
-          "name": "Slack account"
-        }
-      }
     },
     {
       "parameters": {
@@ -607,8 +547,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        864,
-        288
+        1040,
+        624
       ],
       "id": "08e0f580-4a13-4c1c-8c0e-b0aea80c77e0",
       "name": "Format Error Message"
@@ -632,27 +572,6 @@
         672
       ],
       "id": "a099aabf-1b07-44d7-8f89-dbc59206153c"
-    },
-    {
-      "parameters": {
-        "trigger": [
-          "app_mention"
-        ]
-      },
-      "type": "@mbakgun/n8n-nodes-slack-socket-mode.slackSocketTrigger",
-      "typeVersion": 1,
-      "position": [
-        -2752,
-        560
-      ],
-      "id": "db09f494-ef89-41d4-9fa4-ad70f1831ee3",
-      "name": "Slack Socket Mode Trigger",
-      "credentials": {
-        "slackSocketCredentialsApi": {
-          "id": "DA9k00L4jEZTLAAz",
-          "name": "Slack Socket Mode Credentials account"
-        }
-      }
     },
     {
       "parameters": {
@@ -700,7 +619,7 @@
             {
               "id": "fa6be155-9886-4bf0-922c-7b727340c9df",
               "name": "thread_ts",
-              "value": "={{ $('Slack Socket Mode Trigger').item.json.payload.thread_ts }} ? {{ $('Slack Socket Mode Trigger').item.json.payload.thread_ts }} : {{ null }}",
+              "value": "={{ $('Slack Socket Mode Trigger').item.json.payload.thread_ts || null }}",
               "type": "string"
             },
             {
@@ -721,6 +640,163 @@
       ],
       "id": "fa8a7c3a-2d14-4ea9-8c50-0eaccec9b291",
       "name": "Set Slack Event"
+    },
+    {
+      "parameters": {
+        "trigger": [
+          "app_mention"
+        ],
+        "channelsToWatch": {
+          "channelValues": [
+            {
+              "channel": {
+                "__rl": true,
+                "value": "C094KAMLXJS",
+                "mode": "list",
+                "cachedResultName": "#dbdemos-ai-bi-marketing-campaign-genie-space"
+              }
+            }
+          ]
+        },
+        "channelToWatch": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "@mbakgun/n8n-nodes-slack-socket-mode.slackSocketTrigger",
+      "typeVersion": 2,
+      "position": [
+        -2800,
+        560
+      ],
+      "id": "c8f45fca-c890-4443-9744-c630addd082c",
+      "name": "Slack Socket Mode Trigger",
+      "credentials": {
+        "slackSocketCredentialsApi": {
+          "id": "DA9k00L4jEZTLAAz",
+          "name": "Slack Socket Mode Credentials account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json.statement_response;\n\n// 1. Get columns and data rows\nconst columns = response.manifest.schema.columns;\nconst dataRows = response.result.data_array;\n\n// 2. Extract column names for CSV header creation\nconst colNames = columns.map(col => col.name);\n\n// 3. Map each row to an object using column names as keys\nconst output = dataRows.map(rowArr => {\n  const obj = {};\n  for (let i = 0; i < colNames.length; i++) {\n    obj[colNames[i]] = rowArr[i];\n  }\n  return { json: obj };\n});\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        464
+      ],
+      "id": "08e06a91-8848-4c13-81b8-91ed07a997e8",
+      "name": "Flatten Genie Query Results"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "=data",
+        "options": {
+          "fileName": "GenieResults.csv",
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        544,
+        464
+      ],
+      "id": "628f1e69-1248-45d6-a981-042ba0bf8300",
+      "name": "Genie Query Results CSV Conversion"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc83fad5-d1c3-4781-bc6a-68d0400b1b8a",
+              "name": "text",
+              "value": "={{ $json.text.replace(/^- /gm, \"* \").replaceAll(\"**\", \"*\") }}",
+              "type": "string"
+            },
+            {
+              "id": "1c88e168-b159-45d8-8364-816e93b51dd6",
+              "name": "genie_conversation_url",
+              "value": "={{ $('Set Genie Space').item.json.databricks_host }}/genie/rooms/{{ $('Set Genie Space').item.json.space_id }}/chats/{{ $('Get Message').item.json.message_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        448
+      ],
+      "id": "cba25009-2491-4a0f-9d8d-6750178eef19",
+      "name": "Format LLM Message"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $('Set Slack Event').item.json.channel_id }}",
+          "mode": "id"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "thread_ts": {
+            "replyValues": {
+              "thread_ts": "={{ $('Set Slack Event').item.json.thread_ts ? $('Set Slack Event').item.json.thread_ts : $('Set Slack Event').item.json.event_ts}}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        832
+      ],
+      "id": "6dc89488-a6bf-4834-a2e3-8c576c615f90",
+      "name": "Send Genie Text Response",
+      "webhookId": "9b164ec1-f2d6-4ac0-a3da-fb6fb4130cad",
+      "credentials": {
+        "slackApi": {
+          "id": "hnoYjfBoWzJ4cLPb",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "binaryPropertyName": "={{ $('Genie Query Results CSV Conversion').item.binary.data}}",
+        "options": {
+          "channelId": "={{ $('Set Slack Event').item.json.channel_id }}",
+          "initialComment": "={{ $json.text }}\n\n<{{ $('Format LLM Message').item.json.genie_conversation_url }}|Link to Genie Space Conversation>",
+          "threadTs": "={{ $('Set Slack Event').item.json.thread_ts ? $('Set Slack Event').item.json.thread_ts : $('Set Slack Event').item.json.event_ts}}"
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1248,
+        480
+      ],
+      "id": "b730bf05-ff49-4c51-b52b-3f3bcc35d968",
+      "name": "Send Genie Response with File",
+      "webhookId": "9b164ec1-f2d6-4ac0-a3da-fb6fb4130cad",
+      "credentials": {
+        "slackApi": {
+          "id": "hnoYjfBoWzJ4cLPb",
+          "name": "Slack account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -893,7 +969,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields",
+            "node": "Send Genie Text Response",
             "type": "main",
             "index": 0
           }
@@ -904,7 +980,7 @@
       "main": [
         [
           {
-            "node": "Summarize query attachment",
+            "node": "Flatten Genie Query Results",
             "type": "main",
             "index": 0
           }
@@ -926,7 +1002,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields",
+            "node": "Format LLM Message",
             "type": "main",
             "index": 0
           }
@@ -934,17 +1010,6 @@
         [
           {
             "node": "Format Error Message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit Fields": {
-      "main": [
-        [
-          {
-            "node": "Send Genie response",
             "type": "main",
             "index": 0
           }
@@ -977,7 +1042,7 @@
       "main": [
         [
           {
-            "node": "Send Genie response",
+            "node": "Send Genie Response with File",
             "type": "main",
             "index": 0
           }
@@ -996,17 +1061,6 @@
         [
           {
             "node": "Start Conversation",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Slack Socket Mode Trigger": {
-      "main": [
-        [
-          {
-            "node": "Get a channel",
             "type": "main",
             "index": 0
           }
@@ -1034,15 +1088,62 @@
           }
         ]
       ]
+    },
+    "Slack Socket Mode Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flatten Genie Query Results": {
+      "main": [
+        [
+          {
+            "node": "Genie Query Results CSV Conversion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Genie Query Results CSV Conversion": {
+      "main": [
+        [
+          {
+            "node": "Summarize query attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format LLM Message": {
+      "main": [
+        [
+          {
+            "node": "Send Genie Response with File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "0au2Qpgb2uPuSaDz"
   },
-  "versionId": "27962f9c-4adb-4236-bf61-eff11094f213",
+  "versionId": "1482121c-3672-4aa3-846e-894b813f4f85",
   "meta": {
-    "templateCredsSetupCompleted": true,
     "instanceId": "18f2592c5f4dc237bb9cf68aba4b051594266d0ba71f1a32775856beee687965"
   },
   "id": "qbmGTD16hKTcD2C7",
