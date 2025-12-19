@@ -149,10 +149,6 @@ dbdemos.install('aibi-marketing-campaign', catalog = "<insert_catalog_name>")
 
     ![Enable Events](images/enable_events_slack_app.png)
 
-   - Use the Production webhook URL when you want to 'Activate' the workflow to consistently listen for Slack events. Otherwise, use the Test webhook URL for ad hoc execution of the workflow in 'Inactive' mode.
-
-    ![Identify n8n webhook URL](images/identify_n8n_webhook_url.png)
-
 5. **Install the app to your workspace** - Navigate to "Install App" and add the app to your Slack workspace.
 
 ![Add app to workspace](images/add_app_to_workspace.png)
@@ -276,6 +272,8 @@ After importing the workflows, you'll need to configure the following settings i
 - Replace `space_id` value with your Genie Space ID (found in the Genie Space URL)
 - Update `databricks_host` value to match your Databricks workspace URL (e.g., `https://your-workspace.cloud.databricks.com`)
 
+![Set Genie Space ID](images/set_genie_space_id.png)
+
 **In the "Slack Socket Mode Trigger" node:**
 - Update the `channelsToWatch` value with your Slack channel ID
 - The channel ID can be found by right-clicking on the channel in Slack and selecting "Copy link" - it's the alphanumeric string at the end of the URL (e.g., `C094KAMLXJS`)
@@ -291,7 +289,6 @@ After importing the workflows, you'll need to configure the following settings i
 
 ![Identify n8n webhook URL](images/identify_n8n_webhook_url.png)
 
-![Set Genie Space ID](images/set_genie_space_id.png)
 
 #### **Publish Workflows**
 
