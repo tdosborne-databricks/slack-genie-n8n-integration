@@ -11,7 +11,7 @@ This accelerator enables your business to interact with Databricks datasets conv
 - [Dependencies](#dependencies)
 - [Prerequisites](#prerequisites)
 - [Installation Steps](#installation-steps)
-  - [1. Set Up Managed Postgres (Lakebase)](#1-set-up-managed-postgres-lakebase)
+  - [1. Set Up Postgres Database](#1-set-up-postgres-database)
   - [2. Install AI/BI Marketing Campaign Demo via dbdemos](#2-install-aibi-marketing-campaign-demo-via-dbdemos)
   - [3. Set Up ngrok Account (Optional)](#3-set-up-ngrok-account)
   - [4. Create Slack App](#4-create-slack-app)
@@ -25,9 +25,11 @@ This accelerator enables your business to interact with Databricks datasets conv
 
 ## Dependencies
 
-- **Postgres (Lakebase):** 
+- **Postgres:** 
     - Stores mapping between Slack threads and Genie conversation IDs 
-    - Database used by n8n instance for persisting user data.
+    - Database used by n8n instance for persisting user data
+    - Can use Databricks Lakebase (managed Postgres) or any external Postgres instance
+    - **Important:** If using an external Postgres instance, ensure proper firewall rules are configured to allow connections from the Databricks App
 - **dbdemos:** Required for installing the `aibi-marketing-campaign` demo asset.
 - **ngrok (Optional):** Exposes n8n webhook endpoints to Slack for event delivery.
 - **Slack App:** Custom bot for receiving and responding to user queries in Slack.
@@ -41,7 +43,9 @@ This accelerator enables your business to interact with Databricks datasets conv
 ## Prerequisites
 
 - Databricks workspace with Asset Bundle support.
-- Managed Postgres instance (using Lakebase for convience but can work with any Postgres instance). 
+- Postgres instance:
+  - **Option 1 (Recommended):** Databricks Lakebase (managed Postgres) for convenience
+  - **Option 2:** Any external Postgres instance with network access configured to allow connections from Databricks App
 - Necessary permissions to create Databricks App and Genie resources.
 - Slack workspace with permissions to create a custom app.
 - ngrok account for webhook tunneling (Optional - Not required if using Slack Socket Mode node).
@@ -51,10 +55,24 @@ This accelerator enables your business to interact with Databricks datasets conv
 
 ## Installation Steps
 
-### 1. Set Up Managed Postgres (Lakebase)
+### 1. Set Up Postgres Database
 
-- Provision a managed Postgres instance (Lakebase).
-- Create a table to map Slack thread IDs to Genie conversation IDs:
+You have two options for your Postgres database:
+
+#### **Option 1: Databricks Lakebase (Recommended)**
+
+Provision a managed Postgres instance through Databricks Lakebase for seamless integration.
+
+#### **Option 2: External Postgres Instance**
+
+If using an external Postgres instance:
+- Ensure your Postgres server is accessible from the Databricks workspace
+- Configure firewall rules to allow inbound connections from the Databricks App IP addresses
+- Verify network connectivity and port access (default Postgres port: 5432)
+
+#### **Database Setup (Both Options)**
+
+Create the required schema and table to map Slack thread IDs to Genie conversation IDs:
 
 ```sql
 CREATE SCHEMA genie_conversations;
@@ -62,16 +80,18 @@ CREATE SCHEMA genie_conversations;
 CREATE TABLE genie_conversations.slack_genie_conversations (
 thread_ts VARCHAR,
 genie_conversation_id VARCHAR,
-slack_channel VARCHAR
+slack_channel VARCHAR,
 slack_channel_resolved VARCHAR,
 PRIMARY KEY (thread_ts, slack_channel)
 );
 ```
 
-- Create a Postgres native user and password for n8n:
+Create a Postgres native user and password for n8n:
 
 ```sql
 CREATE USER pguser WITH PASSWORD 'password123';
+GRANT ALL PRIVILEGES ON SCHEMA genie_conversations TO pguser;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA genie_conversations TO pguser;
 ```
 
 ---
@@ -201,25 +221,62 @@ databricks bundle run n8n_databricks_app
 
     - Repeat installation steps for `@mbakgun/n8n-nodes-slack-socket-mode`
 
+#### **Import Workflows**
 
-- Import the provided Workflow JSON (`slack_genie_integration_workflow.json`).
+Import both the main workflow and error workflow JSON files:
+
+1. **Main Workflow:** Import `slack_genie_integration_workflow.json`
 
 ![Import Workflow from File](images/import_workflow_from_file.png)
 
-- Add and configure credentials for:
-    - Slack (OAuth token)
-    - Slack Socket Mode (Bot OAuth Token, App-Level Token, Signing Secret - Find App-Level Token + Signing Secret here: https://api.slack.com/apps/<your-app-id>/general) 
-    - Postgres (use connection details from Databricks Workspace - Compute UI and the credentials created earlier)
-    - Databricks (Access Token)
-    - **NOTE:** Only for the initial import, you will need to open each node with a red warning icon and select the corresponding credentials from the dropdown at the top of the form.
+2. **Error Workflow:** Import `Slack Genie Error Workflow.json`
+
+The error workflow automatically handles failures from the main workflow and notifies users in Slack.
+
+#### **Configure Credentials**
+
+Add and configure credentials for:
+- **Slack API** (OAuth token) - Required for sending messages
+- **Slack Socket Mode** (Bot OAuth Token, App-Level Token, Signing Secret)
+  - Find App-Level Token + Signing Secret at: https://api.slack.com/apps/<your-app-id>/general
+- **Postgres** - Use connection details and credentials created in Step 1
+- **Databricks** (Access Token) - For Genie API and Foundation Models access
+- **n8n API** (API Key) - **Required for error workflow**
+  - Go to Settings → n8n API in your n8n instance
+  
+  ![n8n API Settings Location](images/n8n_api_settings_location.png)
+  
+  - Generate a new API key
+  - Configure the credential with:
+    - **API Key:** The generated key from above
+    - **Base URL:** `http://localhost:8000/api/v1` (since we're self-hosting n8n with port 8000)
+  
+  ![n8n Account Credentials Setup](images/n8n_account_credentials_setup.png)
+  
+  - Add this credential in the error workflow's "Get execution data" node
+
+**NOTE:** Only for the initial import, you will need to open each node with a red warning icon and select the corresponding credentials from the dropdown at the top of the form.
 
 ![Setting up Credentials](images/setting_up_credentials.png)
 
-- Replace the space_id in the `Set Genie Space` node with your Genie space's Space ID (found in the Genie Space URL).
+#### **Configure Genie Space**
+
+After importing the workflows, you'll need to configure the following settings in the main workflow:
+
+**In the "Set Genie Space" node:**
+- Replace `space_id` value with your Genie Space ID (found in the Genie Space URL)
+- Update `databricks_host` value to match your Databricks workspace URL (e.g., `https://your-workspace.cloud.databricks.com`)
+
+**In the "Slack Socket Mode Trigger" node:**
+- Update the `channelsToWatch` value with your Slack channel ID
+- The channel ID can be found by right-clicking on the channel in Slack and selecting "Copy link" - it's the alphanumeric string at the end of the URL (e.g., `C094KAMLXJS`)
 
 ![Set Genie Space ID](images/set_genie_space_id.png)
 
-- Activate the workflow.
+#### **Activate Workflows**
+
+- Activate the **error workflow first** (Slack Genie Error Workflow)
+- Then activate the **main workflow** (Slack Genie Workflow)
 
 ![Activate Workflow](images/activate_workflow.png)
 
@@ -228,8 +285,14 @@ databricks bundle run n8n_databricks_app
 ## Usage
 
 - In your designated Slack channel, tag the Slack App bot and ask a question about your dataset.
-- The bot will send your message to the Genie space, Genie will generate a query that is executed by a SQL Warehouse in Databricks and the final results are summarized by a Databricks Foundation Model and posted in the thread.
+- The bot will send your message to the Genie space, where Genie generates and executes a SQL query via a Databricks SQL Warehouse.
+- Final results are summarized by a Databricks Foundation Model and posted in the Slack thread.
+- For query results, you'll receive:
+  - An AI-generated natural language summary
+  - A CSV file attachment with the raw data
+  - A link to view the conversation in the Genie Space
 - Conversations are created for each individual thread. To continue a conversation with full context, reply within the same thread.
+- If any errors occur during execution, the error workflow will automatically notify you in the same Slack thread.
 
 ![Example of Multi-turn Conversation in Slack](images/example_of_conversation_slack_thread.png)
 ---
@@ -237,9 +300,22 @@ databricks bundle run n8n_databricks_app
 ## Troubleshooting
 
 - **Workflow Import Issues:** Ensure the n8n workflow JSON is valid and all credentials are configured.
-- **Slack Events Not Received:** Verify ngrok tunnel is active and Slack event URLs are correct.
-- **Database Errors:** Confirm Lakebase connection details and table schema match the workflow configuration.
-- **Databricks API Errors:** Check that the access token is valid and has necessary permissions.
+- **Slack Events Not Received:** 
+  - If using webhooks: Verify ngrok tunnel is active and Slack event URLs are correct
+  - If using Socket Mode: Verify App-Level Token is correct and Socket Mode is enabled in Slack app settings
+- **Database Connection Errors:** 
+  - Confirm Postgres connection details and table schema match the workflow configuration
+  - If using external Postgres: Verify firewall rules allow connections from Databricks App
+  - Test connectivity using a Postgres client tool
+- **Databricks API Errors:** Check that the access token is valid and has necessary permissions (Genie API, Foundation Models API).
+- **Error Workflow Not Triggering:** 
+  - Ensure the error workflow is activated before the main workflow
+  - Verify n8n API credentials are configured correctly with Base URL: `http://localhost:8000/api/v1`
+  - Check that the error workflow ID matches the `errorWorkflow` setting in the main workflow
+- **n8n API Authentication Issues:** 
+  - Generate a new API key in Settings → n8n API
+  - Ensure Base URL is set to `http://localhost:8000/api/v1` (matches the N8N_PORT environment variable)
+  - Update the n8n API credential in the error workflow
 - **Other Issues:** Contact trevor.osborne@databricks.com for help.
 
 ---
