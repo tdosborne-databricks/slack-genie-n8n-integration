@@ -1,0 +1,42 @@
+bundle:
+  name: n8n_databricks_app_bundle
+
+resources:
+  apps:
+    n8n_databricks_app:
+      name: 'n8n-databricks-app'
+      source_code_path: src # This assumes the app source code is at the root of the project.
+      description: 'A Databricks app which self hosts n8n for building workflows'
+      resources:
+        - name: 'ngrok-token'
+          secret:
+            scope: <your-scope-name>
+            key: ngrok-token
+            permission: READ
+        - name: 'ngrok-url'
+          secret:
+            scope: <your-scope-name>
+            key: ngrok-url
+            permission: READ
+        - name: 'postgres-password'
+          secret:
+            scope: <your-scope-name>
+            key: postgres-password
+            permission: READ
+        - name: 'postgres-user'
+          secret:
+            scope: <your-scope-name>
+            key: postgres-user
+            permission: READ
+        - name: 'postgres-host'
+          secret:
+            scope: <your-scope-name>
+            key: postgres-host
+            permission: READ
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: <your-databricks-workspace-host>
