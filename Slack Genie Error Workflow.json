@@ -1,0 +1,161 @@
+{
+  "name": "Slack Genie Error Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "fbdd7e14-4cae-4e08-a747-a349416b1fcc",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "execution",
+        "operation": "get",
+        "executionId": "={{ $json.execution.id }}",
+        "options": {
+          "activeWorkflows": true
+        },
+        "requestOptions": {}
+      },
+      "id": "85581769-f2d8-42ed-bcdf-a8cc2323aacd",
+      "name": "Get execution data",
+      "type": "n8n-nodes-base.n8n",
+      "position": [
+        224,
+        0
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "n8nApi": {
+          "id": "WD3gx9R1HmM5M0t1",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $json.data.resultData.runData['Set Slack Event'][0].data.main[0][0].json.channel_id }}",
+          "mode": "id"
+        },
+        "text": "={{ $('Error Trigger').item.json.execution.error.message }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "thread_ts": {
+            "replyValues": {
+              "thread_ts": "={{ $json.data.resultData.runData['Set Slack Event'][0].data.main[0][0].json.thread_ts ? $json.data.resultData.runData['Set Slack Event'][0].data.main[0][0].json.thread_ts : $json.data.resultData.runData['Set Slack Event'][0].data.main[0][0].json.event_ts}}"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        464,
+        0
+      ],
+      "id": "e2de6307-7803-4690-b487-15f8a485b84f",
+      "name": "Send a message",
+      "webhookId": "fd075e8c-46d4-4d86-b7c9-a173022388bf",
+      "credentials": {
+        "slackApi": {
+          "id": "hnoYjfBoWzJ4cLPb",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Error Trigger": [
+      {
+        "json": {
+          "execution": {
+            "id": "122",
+            "url": "http://0.0.0.0:8000/workflow/qbmGTD16hKTcD2C7/executions/122",
+            "error": {
+              "level": "warning",
+              "tags": {},
+              "timestamp": 1766122378748,
+              "context": {},
+              "functionality": "regular",
+              "name": "NodeOperationError",
+              "node": {
+                "parameters": {
+                  "errorType": "errorMessage",
+                  "errorMessage": "An error occurred!"
+                },
+                "type": "n8n-nodes-base.stopAndError",
+                "typeVersion": 1,
+                "position": [
+                  -2240,
+                  880
+                ],
+                "id": "d5edcd5b-b124-4653-99b8-3f90ff27a18f",
+                "name": "Stop and Error"
+              },
+              "messages": [],
+              "message": "An error occurred!",
+              "stack": "NodeOperationError: An error occurred!\n    at ExecuteContext.execute (/app/python/source_code/node_modules/n8n-nodes-base/nodes/StopAndError/StopAndError.node.ts:92:9)\n    at WorkflowExecute.executeNode (/app/python/source_code/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1045:31)\n    at WorkflowExecute.runNode (/app/python/source_code/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1226:22)\n    at /app/python/source_code/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1662:38\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at /app/python/source_code/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:2274:11"
+            },
+            "lastNodeExecuted": "Stop and Error",
+            "mode": "trigger",
+            "executionContext": {
+              "version": 1,
+              "establishedAt": 1766122378633,
+              "source": "trigger"
+            }
+          },
+          "workflow": {
+            "id": "qbmGTD16hKTcD2C7",
+            "name": "Slack Genie Workflow"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get execution data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get execution data": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e427a7bd-1498-4f5c-a641-fc1372a2b64a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "18f2592c5f4dc237bb9cf68aba4b051594266d0ba71f1a32775856beee687965"
+  },
+  "id": "0au2Qpgb2uPuSaDz",
+  "tags": []
+}
