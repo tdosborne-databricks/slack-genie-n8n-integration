@@ -125,26 +125,35 @@ dbdemos.install('aibi-marketing-campaign', catalog = "<insert_catalog_name>")
 
 - Refer to [n8n documentation](https://docs.n8n.io/integrations/builtin/credentials/slack/) for Slack credential setup.
 
-**Summary:**
-- Go to [Slack API: Your Apps](https://api.slack.com/apps) and create a new app.
+**Step-by-step setup:**
 
-- Add Bot Token Scopes: `app_mentions:read`, `channels:read`, `chat:write`, `groups:read`, `users:read`
+1. Go to [Slack API: Your Apps](https://api.slack.com/apps) and create a new app.
 
-- [Enable Socket Mode](https://api.slack.com/apis/socket-mode) and generate an App Level Token.
+2. **Add Bot Token Scopes** - Navigate to "OAuth & Permissions" and add the following scopes:
+   - `app_mentions:read` - View messages that directly mention the bot
+   - `channels:read` - View basic information about public channels
+   - `chat:write` - Send messages as the bot
+   - `files:write` - Upload, edit, and delete files
+   - `groups:read` - View basic information about private channels the bot is in
+   - `users:read` - View people in the workspace
+
+![Slack App Bot Token Scopes](images/slack_app_bot_scopes.png)
+
+3. **[Enable Socket Mode](https://api.slack.com/apis/socket-mode)** - Navigate to "Socket Mode" in your app settings and enable it, then generate an App Level Token.
 
 ![Enable Socket Mode](images/enable_slack_socket_mode.png)
 
-- Enable Events and set the Request URL to your n8n webhook URL (**Optional:** Skip if using the default Slack Socket Mode n8n node). 
-
-    - Subscribe the app to bot events (`app_mention`).
+4. **Enable Events** (Optional - only if using webhook mode instead of Socket Mode):
+   - Set the Request URL to your n8n webhook URL
+   - Subscribe the app to bot events (`app_mention`)
 
     ![Enable Events](images/enable_events_slack_app.png)
 
-    - Use the Production webhook URL when you want to 'Activate' the workflow to consistently listen for Slack events. Otherwise, use the Test webhook URL for ad hoc execution of the workflow in 'Inactive' mode.
+   - Use the Production webhook URL when you want to 'Activate' the workflow to consistently listen for Slack events. Otherwise, use the Test webhook URL for ad hoc execution of the workflow in 'Inactive' mode.
 
     ![Identify n8n webhook URL](images/identify_n8n_webhook_url.png)
 
-- Add the app to your workspace.
+5. **Install the app to your workspace** - Navigate to "Install App" and add the app to your Slack workspace.
 
 ![Add app to workspace](images/add_app_to_workspace.png)
 ---
